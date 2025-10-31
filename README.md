@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=FF6B35&height=200&section=header&text=IoT%20Fire%20Prevention&fontSize=50&fontColor=fff&animation=twinkling&fontAlignY=40&desc=Node-RED%20|%20InfluxDB%20|%20Grafana%20|%20ESP32&descAlignY=60&descSize=18">
 
@@ -9,6 +9,8 @@
 <p align="center">
   <i>🔥 Um sistema IoT inteligente de monitoramento e prevenção de risco de queimadas, coletando dados de sensores simulados e condições meteorológicas reais de múltiplos estados brasileiros.</i>
 </p>
+
+---
 
 ### 🎯 Project Goal | Objetivo do Projeto
 
@@ -334,7 +336,7 @@ node-red
 🌬️ Wind / Vento: 45.2 km/h
 
 ──────────────────
-⏰ 2025-10-31 02:02:41
+⏰ 2025-10-31 16:42:09
 
 🚨 *IMMEDIATE ACTION REQUIRED!*
 🚨 *AÇÃO IMEDIATA NECESSÁRIA!*
@@ -423,6 +425,8 @@ git push origin feature/nova-feature
 
 </div>
 
+---
+
 <p align="center">
   <b>⚠️ WARNING | AVISO ⚠️</b><br>
   <i>This is an educational monitoring system. In real emergencies, always call the fire department (193) and follow official safety protocols.</i><br>
@@ -476,8 +480,13 @@ git push origin feature/nova-feature
       </a>
     </td>
     <td align="center">
-      <b>Nicolai JZ</b>
+      <a href="https://github.com/Nicolai012" target="_blank">
+        <b>Nicolai JZ</b>
+      </a>
       <br>
+      <a href="https://github.com/Nicolai012" target="_blank">
+        <img src="https://skillicons.dev/icons?i=github" alt="GitHub"/>
+      </a>
       <a href="https://www.linkedin.com/in/nicolai-jz/" target="_blank">
         <img src="https://skillicons.dev/icons?i=linkedin" alt="LinkedIn"/>
       </a>
