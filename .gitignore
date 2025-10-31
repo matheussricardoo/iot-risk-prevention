@@ -1,0 +1,47 @@
+# Node-RED
+node_modules/
+.config.nodes.json
+.sessions.json
+flows_cred.json
+settings.js
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Arquivos de debug/troubleshooting (mantidos no histórico mas ignorados em futuras alterações)
+DEBUG_*.md
+TESTE_*.md
+TROUBLESHOOTING_*.md
+LIMPAR_*.md
+*_CORRIGIDO.json
+*_QUERIES_*.md
+PAINEL_*_SOLUCAO.md
+
+# Backup files
+*.backup
+*_backup.*
