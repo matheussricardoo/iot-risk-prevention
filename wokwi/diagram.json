@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "author": "Sistema IoT Queimadas",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -48,
+      "left": 105.6,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-slide-potentiometer",
+      "id": "smoke_sensor",
+      "top": 60,
+      "left": 230,
+      "rotate": 270,
+      "attrs": { "label": "🔥 Sensor Fumaça (MQ-2)" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "flame_sensor",
+      "top": 180,
+      "left": 230,
+      "attrs": { "label": "🔥 Sensor Chama", "color": "red" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer",
+      "top": 300,
+      "left": 100,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_red",
+      "top": 300,
+      "left": -20,
+      "attrs": { "color": "red", "label": "Alerta" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_green",
+      "top": 350,
+      "left": -20,
+      "attrs": { "color": "green", "label": "Status OK" }
+    }
+  ],
+  "connections": [
+    [ "esp:3V3", "dht1:VCC", "red", [ "h0" ] ],
+    [ "esp:GND.1", "dht1:GND", "black", [ "h0" ] ],
+    [ "esp:D15", "dht1:SDA", "green", [ "h0" ] ],
+    [ "esp:D34", "smoke_sensor:SIG", "orange", [ "h0" ] ],
+    [ "esp:3V3", "smoke_sensor:VCC", "red", [ "h10" ] ],
+    [ "esp:GND.2", "smoke_sensor:GND", "black", [ "h0" ] ],
+    [ "esp:D35", "flame_sensor:1.l", "blue", [ "h0" ] ],
+    [ "esp:GND.3", "flame_sensor:2.l", "black", [ "h0" ] ],
+    [ "esp:D25", "buzzer:1", "purple", [ "h0" ] ],
+    [ "esp:GND.4", "buzzer:2", "black", [ "h-10" ] ],
+    [ "esp:D2", "led_red:A", "red", [ "h0" ] ],
+    [ "esp:GND.5", "led_red:C", "black", [ "h0" ] ],
+    [ "esp:D4", "led_green:A", "green", [ "h0" ] ],
+    [ "esp:GND.6", "led_green:C", "black", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}
