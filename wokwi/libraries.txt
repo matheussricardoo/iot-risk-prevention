@@ -1,0 +1,7 @@
+# Libraries allowed for the Wokwi project
+# Bibliotecas necessárias para o projeto Wokwi
+
+WiFi
+PubSubClient
+DHT sensor libraryc
+ArduinoJson
