@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "author": "Sistema IoT Queimadas - Dispositivo Atuadores",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd",
+      "top": -100,
+      "left": 200,
+      "attrs": { "pins": "i2c" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_green",
+      "top": 100,
+      "left": 250,
+      "attrs": { "color": "green", "label": "Risco Baixo" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_yellow",
+      "top": 150,
+      "left": 250,
+      "attrs": { "color": "yellow", "label": "Risco Médio" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_orange",
+      "top": 200,
+      "left": 250,
+      "attrs": { "color": "orange", "label": "Risco Alto" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_red",
+      "top": 250,
+      "left": 250,
+      "attrs": { "color": "red", "label": "Risco Crítico" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer",
+      "top": 320,
+      "left": 250,
+      "attrs": { "volume": "0.8" }
+    },
+    {
+      "type": "wokwi-relay-module",
+      "id": "relay",
+      "top": 400,
+      "left": 250,
+      "attrs": { "label": "Sirene Externa" }
+    }
+  ],
+  "connections": [
+    [ "esp:SDA", "lcd:SDA", "blue", [ "h0" ] ],
+    [ "esp:SCL", "lcd:SCL", "yellow", [ "h0" ] ],
+    [ "esp:3V3", "lcd:VCC", "red", [ "h0" ] ],
+    [ "esp:GND.1", "lcd:GND", "black", [ "h0" ] ],
+    [ "esp:D13", "led_green:A", "green", [ "h0" ] ],
+    [ "esp:GND.2", "led_green:C", "black", [ "h0" ] ],
+    [ "esp:D12", "led_yellow:A", "yellow", [ "h0" ] ],
+    [ "esp:GND.3", "led_yellow:C", "black", [ "h0" ] ],
+    [ "esp:D14", "led_orange:A", "orange", [ "h0" ] ],
+    [ "esp:GND.4", "led_orange:C", "black", [ "h0" ] ],
+    [ "esp:D27", "led_red:A", "red", [ "h0" ] ],
+    [ "esp:GND.5", "led_red:C", "black", [ "h0" ] ],
+    [ "esp:D26", "buzzer:1", "purple", [ "h0" ] ],
+    [ "esp:GND.6", "buzzer:2", "black", [ "h0" ] ],
+    [ "esp:D25", "relay:IN", "orange", [ "h0" ] ],
+    [ "esp:3V3", "relay:VCC", "red", [ "h10" ] ],
+    [ "esp:GND.7", "relay:GND", "black", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}
