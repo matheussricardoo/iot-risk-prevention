@@ -1,0 +1,7 @@
+# Bibliotecas para o Dispositivo de Atuadores
+# Device 2: ESP32 + LEDs + Buzzer + LCD + Relay
+
+WiFi
+PubSubClient
+ArduinoJson
+LiquidCrystal I2C
