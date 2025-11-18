@@ -1,0 +1,5 @@
+# Bibliotecas necessárias para ESP32 Sensores
+DHT sensor library
+Adafruit Unified Sensor
+PubSubClient
+ArduinoJson
