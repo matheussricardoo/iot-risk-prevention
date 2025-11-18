@@ -83,6 +83,7 @@
 ├──────────────────────────────────────────────────────────┤
 │                        Node-RED                            │
 │  • Receives MQTT data from ESP32                           │
+│  • Receives HTTP/REST data from OpenWeather API            │
 │  • Queries real-time weather (3 states)                    │
 │  • Risk analysis algorithm                                 │
 │  • Data formatting for InfluxDB                            │
@@ -127,6 +128,7 @@ Measurement: fire_detection
 ├──────────────────────────────────────────────────────────┤
 │                      Node-RED                              │
 │  • Recebe dados MQTT do ESP32                              │
+│  • Recebe dados HTTP/REST da API OpenWeather              │
 │  • Consulta clima em tempo real (3 estados)                │
 │  • Algoritmo de análise de risco                           │
 │  • Formatação de dados para InfluxDB                       │
