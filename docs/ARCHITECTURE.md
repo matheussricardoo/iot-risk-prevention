@@ -139,6 +139,12 @@
        │
        ▼
 ┌──────────────┐
+│ Combine Data │
+│ Sensor+Weather│
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
 │ Analyze Fire │
 │  Risk Score  │
 └──────┬───────┘
@@ -180,6 +186,12 @@
        │
        ▼
 ┌──────────────┐
+│ Combinar     │
+│ Sensor+Clima │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
 │ Análise de   │
 │ Risco        │
 └──────┬───────┘
@@ -192,6 +204,25 @@
 │ InfluxDB     │ │ (Risco ≥50)  │ │ Debug        │
 └──────────────┘ └──────────────┘ └──────────────┘
 ```
+
+#### Node-RED Functions | Funções do Node-RED
+**EN:**
+- Receives MQTT data from ESP32 (Wokwi simulator)
+- Receives HTTP/REST data from OpenWeather API
+- Automatic API simulator (every 30 seconds for 3 states)
+- Combines sensor + weather data
+- Calculates fire risk score (0-100)
+- Formats data for InfluxDB
+- Sends WhatsApp alerts when risk ≥ 50
+
+**PT-BR:**
+- Recebe dados MQTT do ESP32 (simulador Wokwi)
+- Recebe dados HTTP/REST da API OpenWeather
+- Simulador automático API (a cada 30 segundos para 3 estados)
+- Combina dados de sensores + clima
+- Calcula pontuação de risco de incêndio (0-100)
+- Formata dados para InfluxDB
+- Envia alertas WhatsApp quando risco ≥ 50
 
 #### Risk Algorithm | Algoritmo de Risco
 **EN:** Implemented in a Node-RED `function` node, it calculates a score from 0-100 based on 5 weighted factors: smoke level (40%), internal temperature (25%), external temperature (15%), average humidity (10%), and wind speed (10%).
