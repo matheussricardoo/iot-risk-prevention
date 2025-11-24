@@ -94,7 +94,7 @@
 from(bucket: "fire-detection")
   |> range(start: -24h)
   |> filter(fn: (r) => r["_measurement"] == "fire_detection")
-  |> filter(fn: (r) => r["_field"] == "sensor_temp")
+  |> filter(fn: (r) => r["_field"] == "weather_temp")
   |> filter(fn: (r) => r["device"] == "api")
   |> mean()
 ```
@@ -110,23 +110,23 @@ from(bucket: "fire-detection")
 from(bucket: "fire-detection")
   |> range(start: -24h)
   |> filter(fn: (r) => r["_measurement"] == "fire_detection")
-  |> filter(fn: (r) => r["_field"] == "sensor_humidity")
+  |> filter(fn: (r) => r["_field"] == "weather_humidity")
   |> filter(fn: (r) => r["device"] == "api")
   |> mean()
 ```
 
 ---
 
-**Gauge 3 - Average Smoke (Fumaça Média):**
-- **Title (EN):** `💨 Average Smoke - All States`
-- **Title (PT-BR):** `💨 Fumaça Média - Todos os Estados`
-- **Unit:** `ppm`
+**Gauge 3 - Average Wind Speed (Velocidade Média do Vento):**
+- **Title (EN):** `💨 Average Wind Speed - All States`
+- **Title (PT-BR):** `💨 Velocidade Média do Vento - Todos os Estados`
+- **Unit:** `velocity (km/h)`
 
 ```flux
 from(bucket: "fire-detection")
   |> range(start: -24h)
   |> filter(fn: (r) => r["_measurement"] == "fire_detection")
-  |> filter(fn: (r) => r["_field"] == "sensor_smoke")
+  |> filter(fn: (r) => r["_field"] == "weather_wind")
   |> filter(fn: (r) => r["device"] == "api")
   |> mean()
 ```
@@ -152,7 +152,7 @@ from(bucket: "fire-detection")
 **Thresholds for each gauge:**
 - **Temperature:** Green (<30), Yellow (30-35), Orange (35-40), Red (>40)
 - **Humidity:** Red (<30), Orange (30-50), Yellow (50-60), Green (>60)
-- **Smoke:** Green (<200), Yellow (200-400), Orange (400-600), Red (>600)
+- **Wind Speed:** Green (<20), Yellow (20-30), Orange (30-40), Red (>40)
 - **Risk Score:** Green (0-30), Yellow (30-50), Orange (50-70), Red (70-100)
 
 **Additional Configuration:**
@@ -174,8 +174,8 @@ from(bucket: "fire-detection")
 ┌────────────────────────────────────────────────────────────────┐
 │                    🌐 API - MULTI-STATE METRICS                │
 ├────────────────────────────────────────────────────────────────┤
-│  🌡️ Temp    │  💧 Humidity  │  💨 Smoke    │  🔥 Risk Score  │
-│  Average    │  Average      │  Average     │  Average        │
+│  🌡️ Temp    │  💧 Humidity  │  💨 Wind     │  🔥 Risk Score  │
+│  Average    │  Average      │  Speed Avg   │  Average        │
 │  (Gauge)    │  (Gauge)      │  (Gauge)     │  (Gauge)        │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -185,8 +185,8 @@ from(bucket: "fire-detection")
 ┌────────────────────────────────────────────────────────────────┐
 │              🌐 API - MÉTRICAS DOS ESTADOS                     │
 ├────────────────────────────────────────────────────────────────┤
-│  🌡️ Temp    │  💧 Umidade   │  💨 Fumaça   │  🔥 Risco       │
-│  Média      │  Média        │  Média       │  Médio          │
+│  🌡️ Temp    │  💧 Umidade   │  💨 Vento    │  🔥 Risco       │
+│  Média      │  Média        │  Vel. Média  │  Médio          │
 │  (Gauge)    │  (Gauge)      │  (Gauge)     │  (Gauge)        │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -217,7 +217,7 @@ from(bucket: "fire-detection")
    - Click **Apply**
 
 4. **Add Gauges 2, 3, 4:**
-   - Repeat step 3 for Humidity, Smoke, and Risk Score
+   - Repeat step 3 for Humidity, Wind Speed, and Risk Score
    - Place all 4 gauges in the same row
 
 5. **Save Dashboard:**
@@ -245,7 +245,7 @@ from(bucket: "fire-detection")
    - Clique em **Apply**
 
 4. **Adicione os Gauges 2, 3, 4:**
-   - Repita o passo 3 para Umidade, Fumaça e Risco
+   - Repita o passo 3 para Umidade, Velocidade do Vento e Risco
    - Coloque todos os 4 gauges na mesma linha
 
 5. **Salve o Dashboard:**

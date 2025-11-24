@@ -30,21 +30,20 @@ from(bucket: "fire-detection")
 
 </div>
 
-### 2. Internal vs. External Temperature (Multi-series) | Temperatura Interna vs. Externa
+### 2. Real Weather Data - Temperature (Time Series) | Dados Meteorológicos Reais - Temperatura
 
 <div align="left">
 
-**EN:** Compares sensor temperature with real weather temperature on the same graph.
+**EN:** Shows real weather temperature from OpenWeather API over time by state.
 <br>
-**PT-BR:** Compara a temperatura do sensor com a temperatura real do clima no mesmo gráfico.
+**PT-BR:** Mostra a temperatura meteorológica real da API OpenWeather ao longo do tempo por estado.
 
 ```flux
 from(bucket: "fire-detection")
   |> range(start: -6h)
   |> filter(fn: (r) => r["_measurement"] == "fire_detection")
-  |> filter(fn: (r) => r["_field"] == "sensor_temp" or r["_field"] == "weather_temp")
+  |> filter(fn: (r) => r["_field"] == "weather_temp")
   |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)
-  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
 ```
 
 </div>
@@ -53,9 +52,9 @@ from(bucket: "fire-detection")
 
 <div align="left">
 
-**EN:** Gets the most recent value for a `Gauge` or `Stat` panel. Replace `risk_score` with the desired field: `sensor_temp`, `sensor_humidity`, `sensor_smoke`, or `risk_score`.
+**EN:** Gets the most recent value for a `Gauge` or `Stat` panel. Replace `risk_score` with the desired field: `weather_temp`, `weather_humidity`, `weather_wind`, or `risk_score`.
 <br>
-**PT-BR:** Obtém o valor mais recente para um painel `Gauge` ou `Stat`. Substitua `risk_score` pelo campo desejado: `sensor_temp`, `sensor_humidity`, `sensor_smoke` ou `risk_score`.
+**PT-BR:** Obtém o valor mais recente para um painel `Gauge` ou `Stat`. Substitua `risk_score` pelo campo desejado: `weather_temp`, `weather_humidity`, `weather_wind` ou `risk_score`.
 
 ```flux
 from(bucket: "fire-detection")
@@ -131,31 +130,31 @@ from(bucket: "fire-detection")
 
 </div>
 
-### 7. Multi-Variable Time Series by State | Série Temporal Multi-Variável por Estado
+### 7. Real Weather Metrics by State (Time Series) | Métricas Meteorológicas Reais por Estado
 
 <div align="left">
 
-**EN:** Shows temperature, humidity, and smoke levels over time for each state on separate series. Ideal for a `Time series` panel with multiple Y-axes.
+**EN:** Shows real weather data (temperature, humidity, wind) over time for each state. Ideal for a `Time series` panel with multiple Y-axes.
 <br>
-**PT-BR:** Mostra os níveis de temperatura, umidade e fumaça ao longo do tempo para cada estado em séries separadas. Ideal para um painel de `Série Temporal` com múltiplos eixos Y.
+**PT-BR:** Mostra dados meteorológicos reais (temperatura, umidade, vento) ao longo do tempo para cada estado. Ideal para um painel de `Série Temporal` com múltiplos eixos Y.
 
 ```flux
 from(bucket: "fire-detection")
   |> range(start: -6h)
   |> filter(fn: (r) => r["_measurement"] == "fire_detection")
-  |> filter(fn: (r) => r["_field"] == "sensor_temp" or r["_field"] == "sensor_humidity" or r["_field"] == "sensor_smoke" or r["_field"] == "state")
+  |> filter(fn: (r) => r["_field"] == "weather_temp" or r["_field"] == "weather_humidity" or r["_field"] == "weather_wind" or r["_field"] == "state")
   |> aggregateWindow(every: 5m, fn: last, createEmpty: false)
   |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
   |> group(columns: ["state"])
 ```
 
 **Configuration Tips (EN):**
-- Use **Field overrides** to assign different Y-axes: Temperature (left), Humidity (right), Smoke (right-2)
+- Use **Field overrides** to assign different Y-axes: Temperature (left), Humidity (right), Wind (right-2)
 - Enable **Legend** with format: `{{state}} - {{_field}}`
 - Set different colors per metric type
 
 **Dicas de Configuração (PT-BR):**
-- Use **Field overrides** para atribuir diferentes eixos Y: Temperatura (esquerda), Umidade (direita), Fumaça (direita-2)
+- Use **Field overrides** para atribuir diferentes eixos Y: Temperatura (esquerda), Umidade (direita), Vento (direita-2)
 - Ative a **Legenda** com formato: `{{state}} - {{_field}}`
 - Defina cores diferentes por tipo de métrica
 
@@ -198,9 +197,9 @@ from(bucket: "fire-detection")
 
 <div align="left">
 
-**EN:** Shows only HIGH and CRITICAL risk events from the last 24 hours. Ideal for a `Table` panel focused on actionable alerts.
+**EN:** Shows only HIGH and CRITICAL risk events from the last 24 hours with real weather data. Ideal for a `Table` panel focused on actionable alerts.
 <br>
-**PT-BR:** Mostra apenas eventos de risco ALTO e CRÍTICO das últimas 24 horas. Ideal para um painel de `Tabela` focado em alertas acionáveis.
+**PT-BR:** Mostra apenas eventos de risco ALTO e CRÍTICO das últimas 24 horas com dados meteorológicos reais. Ideal para um painel de `Tabela` focado em alertas acionáveis.
 
 ```flux
 from(bucket: "fire-detection")
@@ -211,18 +210,18 @@ from(bucket: "fire-detection")
   |> filter(fn: (r) => exists r.risk_score and float(v: r.risk_score) >= 50.0)
   |> sort(columns: ["_time"], desc: true)
   |> limit(n: 50)
-  |> keep(columns: ["_time", "state", "location", "risk_score", "sensor_temp", "sensor_humidity", "sensor_smoke"])
+  |> keep(columns: ["_time", "state", "location", "risk_score", "weather_temp", "weather_humidity", "weather_wind"])
 ```
 
 **Configuration Tips (EN):**
 - Add **Cell color** override for `risk_score` column: 50-70 (orange), 70-100 (red)
 - Hide unnecessary columns (`_measurement`, `_start`, `_stop`)
-- Rename columns: `_time` → "Timestamp", `state` → "State", `risk_score` → "Risk"
+- Rename columns: `_time` → "Timestamp", `state` → "State", `risk_score` → "Risk", `weather_temp` → "Temperature", `weather_humidity` → "Humidity", `weather_wind` → "Wind"
 
 **Dicas de Configuração (PT-BR):**
 - Adicione override de **Cor de célula** para coluna `risk_score`: 50-70 (laranja), 70-100 (vermelho)
 - Oculte colunas desnecessárias (`_measurement`, `_start`, `_stop`)
-- Renomeie colunas: `_time` → "Timestamp", `state` → "Estado", `risk_score` → "Risco"
+- Renomeie colunas: `_time` → "Timestamp", `state` → "Estado", `risk_score` → "Risco", `weather_temp` → "Temperatura", `weather_humidity` → "Umidade", `weather_wind` → "Vento"
 
 </div>
 
@@ -334,15 +333,15 @@ from(bucket: "fire-detection")
 
 **EN:**
 - **Risk Score (0-100):** Green (0-30), Yellow (30-50), Orange (50-70), Red (70-100).
-- **Temperature (°C):** Green (<30), Yellow (30-35), Orange (35-40), Red (>40).
-- **Smoke (ppm):** Green (<200), Yellow (200-400), Orange (400-600), Red (>600).
-- **Humidity (%):** Red (<30), Orange (30-50), Yellow (50-60), Green (>60).
+- **Weather Temperature (°C):** Green (<30), Yellow (30-35), Orange (35-40), Red (>40).
+- **Weather Humidity (%):** Red (<30), Orange (30-50), Yellow (50-60), Green (>60).
+- **Wind Speed (km/h):** Green (<20), Yellow (20-30), Orange (30-40), Red (>40).
 
 **PT-BR:**
 - **Pontuação de Risco (0-100):** Verde (0-30), Amarelo (30-50), Laranja (50-70), Vermelho (70-100).
-- **Temperatura (°C):** Verde (<30), Amarelo (30-35), Laranja (35-40), Vermelho (>40).
-- **Fumaça (ppm):** Verde (<200), Amarelo (200-400), Laranja (400-600), Vermelho (>600).
-- **Umidade (%):** Vermelho (<30), Laranja (30-50), Amarelo (50-60), Verde (>60).
+- **Temperatura Meteorológica (°C):** Verde (<30), Amarelo (30-35), Laranja (35-40), Vermelho (>40).
+- **Umidade Meteorológica (%):** Vermelho (<30), Laranja (30-50), Amarelo (50-60), Verde (>60).
+- **Velocidade do Vento (km/h):** Verde (<20), Amarelo (20-30), Laranja (30-40), Vermelho (>40).
 
 </div>
 
