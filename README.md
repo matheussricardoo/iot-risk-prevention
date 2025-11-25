@@ -32,6 +32,19 @@
 
 </div>
 
+### 📺 Project Demo | Demo do Projeto
+
+<div align="center">
+
+[![Watch the video](https://img.youtube.com/vi/ucTAAcTbRl0/maxresdefault.jpg)](https://youtu.be/ucTAAcTbRl0)
+
+<p align="center">
+  <i>🎥 Watch the full project presentation and demonstration on YouTube</i><br>
+  <i>🎥 Assista à apresentação e demonstração completa do projeto no YouTube</i>
+</p>
+
+</div>
+
 ### 🗺️ Monitored States | Estados Monitorados
 
 <div align="center">
@@ -66,40 +79,25 @@
 
 **EN:**
 ```
-┌──────────────────────────────────────────────────────────┐
-│                       SENSOR LAYER                       │
-├──────────────────────────────────────────────────────────┤
-│ Wokwi ESP32 (Simulated)        OpenWeather API (Real)      │
-│  • Temperature                 • Temperature               │
-│  • Humidity                    • Humidity                  │
-│  • Smoke Sensor                • Wind Speed                │
-│  • Flame Sensor                • Weather Conditions        │
-└───────────────┬──────────────────────┬─────────────────────┘
-                │                      │
-                │ MQTT (HiveMQ)        │ HTTP/REST
-                │                      │
-┌───────────────▼──────────────────────▼─────────────────────┐
-│                      PROCESSING LAYER                      │
-├──────────────────────────────────────────────────────────┤
-│                        Node-RED                            │
-│  • Receives MQTT data from ESP32                           │
-│  • Receives HTTP/REST data from OpenWeather API            │
-│  • Queries real-time weather (3 states)                    │
-│  • Risk analysis algorithm                                 │
-│  • Data formatting for InfluxDB                            │
-│  • WhatsApp alert generation                               │
-└───────────────┬──────────────────────┬─────────────────────┘
-                │                      │
-                │ InfluxDB Line        │ WhatsApp API
-                │ Protocol             │
-┌───────────────▼──────────────────────▼─────────────────────┐
-│                       OUTPUT LAYER                         │
-├──────────────────────────────────────────────────────────┤
-│  InfluxDB Cloud      Grafana Cloud      WhatsApp           │
-│  • Storage           • Dashboards       • Alerts           │
-│  • Time series       • Visualization    • Critical         │
-│  • Analytics         • Analysis         • High             │
-└──────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                      1. SENSOR LAYER                        │
+│             (Data Collection - Simulated + Real)            │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                   2. COMMUNICATION LAYER                    │
+│                 (MQTT + HTTP - IoT Protocols)               │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                     3. PROCESSING LAYER                     │
+│          (Node-RED - Analysis + Risk Algorithm)             │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                       4. OUTPUT LAYER                       │
+│          (InfluxDB + Grafana + WhatsApp Alerts)             │
+└─────────────────────────────────────────────────────────────┘
 ```
 **InfluxDB Configuration:**
 ```
@@ -111,40 +109,25 @@ Measurement: fire_detection
 
 **PT-BR:**
 ```
-┌──────────────────────────────────────────────────────────┐
-│                    CAMADA DE SENSORES                      │
-├──────────────────────────────────────────────────────────┤
-│  Wokwi ESP32 (Simulado)        OpenWeather API (Real)      │
-│  • Temperatura                 • Temperatura               │
-│  • Umidade                     • Umidade                   │
-│  • Sensor de Fumaça            • Velocidade do vento       │
-│  • Sensor de Chama             • Condições climáticas      │
-└───────────────┬──────────────────────┬─────────────────────┘
-                │                      │
-                │ MQTT (HiveMQ)        │ HTTP/REST
-                │                      │
-┌───────────────▼──────────────────────▼─────────────────────┐
-│                   CAMADA DE PROCESSAMENTO                  │
-├──────────────────────────────────────────────────────────┤
-│                      Node-RED                              │
-│  • Recebe dados MQTT do ESP32                              │
-│  • Recebe dados HTTP/REST da API OpenWeather              │
-│  • Consulta clima em tempo real (3 estados)                │
-│  • Algoritmo de análise de risco                           │
-│  • Formatação de dados para InfluxDB                       │
-│  • Geração de alertas WhatsApp                             │
-└───────────────┬──────────────────────┬─────────────────────┘
-                │                      │
-                │ InfluxDB Line        │ WhatsApp API
-                │ Protocol             │
-┌───────────────▼──────────────────────▼─────────────────────┐
-│                    CAMADA DE SAÍDA                         │
-├──────────────────────────────────────────────────────────┤
-│  InfluxDB Cloud      Grafana Cloud      WhatsApp           │
-│  • Armazenamento     • Dashboards       • Alertas          │
-│  • Séries temporais  • Visualização     • Crítico          │
-│  • Análises          • Análises         • Alto             │
-└──────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    1. CAMADA DE SENSORES                    │
+│              (Coleta de dados - Simulado + Real)            │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                 2. CAMADA DE COMUNICAÇÃO                    │
+│              (MQTT + HTTP - Protocolos IoT)                 │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                3. CAMADA DE PROCESSAMENTO                   │
+│       (Node-RED - Análise + Algoritmo de Risco)             │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                    4. CAMADA DE SAÍDA                       │
+│          (InfluxDB + Grafana + WhatsApp Alerts)             │
+└─────────────────────────────────────────────────────────────┘
 ```
 **Configuração InfluxDB:**
 ```
