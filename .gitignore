@@ -45,3 +45,6 @@ PAINEL_*_SOLUCAO.md
 # Backup files
 *.backup
 *_backup.*
+
+.local-node-red/
+node_modules/

@@ -28,7 +28,12 @@
         "inputs": 0,
         "x": 130,
         "y": 120,
-        "wires": [["parse_json_wokwi"]]
+        "wires": [
+            [
+                "parse_json_wokwi"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "parse_json_wokwi",
@@ -39,19 +44,27 @@
         "action": "obj",
         "x": 310,
         "y": 120,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ]
     },
     {
         "id": "save_sensor_data",
         "type": "function",
         "z": "fire_detection_tab",
         "name": "Salvar Dados Sensor",
-        "func": "// Salvar dados do sensor em contexto global para uso posterior\nglobal.set('sensorData', {\n    device: msg.payload.device || 'esp32-wokwi',\n    temperature: parseFloat(msg.payload.temperature) || 0,\n    humidity: parseFloat(msg.payload.humidity) || 0,\n    smoke: parseFloat(msg.payload.smoke) || 0,\n    alert: msg.payload.alert || false,\n    timestamp: new Date().toISOString()\n});\n\nnode.status({fill:\"green\", shape:\"dot\", text:`${msg.payload.device}: Temp=${msg.payload.temperature}°C`});\n\nreturn msg;",
+        "func": "const requiredNumber = value => {\n    if (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) {\n        throw new Error('Missing or invalid numeric observation');\n    }\n    return Number(value);\n};\nglobal.set('sensorData', {\n    device: msg.payload.device || 'esp32-wokwi',\n    temperature: requiredNumber(msg.payload.temperature),\n    humidity: requiredNumber(msg.payload.humidity),\n    smoke: requiredNumber(msg.payload.smoke),\n    alert: msg.payload.alert || false,\n    timestamp: new Date().toISOString()\n});\n\nnode.status({fill:\"green\", shape:\"dot\", text:`${msg.payload.device}: Temp=${msg.payload.temperature}°C`});\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "x": 510,
         "y": 120,
-        "wires": [["trigger_states"]]
+        "wires": [
+            [
+                "trigger_states"
+            ]
+        ]
     },
     {
         "id": "trigger_states",
@@ -63,7 +76,11 @@
         "noerr": 0,
         "x": 730,
         "y": 120,
-        "wires": [["split_states"]]
+        "wires": [
+            [
+                "split_states"
+            ]
+        ]
     },
     {
         "id": "split_states",
@@ -78,7 +95,11 @@
         "addname": "",
         "x": 920,
         "y": 120,
-        "wires": [["route_to_weather"]]
+        "wires": [
+            [
+                "route_to_weather"
+            ]
+        ]
     },
     {
         "id": "comment_clima",
@@ -100,7 +121,17 @@
         "noerr": 0,
         "x": 180,
         "y": 280,
-        "wires": [["weather_amazonas"], ["weather_ms"], ["weather_mg"]]
+        "wires": [
+            [
+                "weather_amazonas"
+            ],
+            [
+                "weather_ms"
+            ],
+            [
+                "weather_mg"
+            ]
+        ]
     },
     {
         "id": "weather_amazonas",
@@ -115,7 +146,12 @@
         "language": "pt",
         "x": 460,
         "y": 240,
-        "wires": [["analyze_fire_risk"]]
+        "wires": [
+            [
+                "analyze_fire_risk"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "weather_ms",
@@ -130,7 +166,12 @@
         "language": "pt",
         "x": 470,
         "y": 280,
-        "wires": [["analyze_fire_risk"]]
+        "wires": [
+            [
+                "analyze_fire_risk"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "weather_mg",
@@ -145,7 +186,12 @@
         "language": "pt",
         "x": 480,
         "y": 320,
-        "wires": [["analyze_fire_risk"]]
+        "wires": [
+            [
+                "analyze_fire_risk"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "comment_analise",
@@ -162,14 +208,19 @@
         "type": "function",
         "z": "fire_detection_tab",
         "name": "Calcular Risco de Queimada",
-        "func": "// Recuperar dados do sensor\nconst sensor = global.get('sensorData') || {\n    temperature: 25,\n    humidity: 50,\n    smoke: 100,\n    device: 'esp32-wokwi'\n};\n\n// Extrair dados meteorológicos\nconst weather = msg.payload;\nconst extTemp = parseFloat(weather.tempc) || 25;\nconst extHumidity = parseFloat(weather.humidity) || 50;\nconst windSpeed = parseFloat(weather.windspeed) || 0;\nconst conditions = weather.description || 'desconhecido';\n\n// ⚠️ CRÍTICO: Preservar msg.location que vem do nó trigger_states\n// Se msg.location existe, usar direto (vem do split_states)\n// Caso contrário, tentar inferir do payload OpenWeather (fallback)\nlet location;\nif (msg.location && msg.location.abbr) {\n    // ✅ Localização já está correta do flow anterior\n    location = msg.location;\n} else {\n    // ⚠️ Fallback: tentar extrair do nome da cidade no OpenWeather\n    const cityName = weather.location || '';\n    if (cityName.includes('Manaus')) {\n        location = { city: 'Manaus', state: 'Amazonas', abbr: 'AM', country: 'Brazil' };\n    } else if (cityName.includes('Campo Grande')) {\n        location = { city: 'Campo Grande', state: 'Mato Grosso do Sul', abbr: 'MS', country: 'Brazil' };\n    } else if (cityName.includes('Belo Horizonte')) {\n        location = { city: 'Belo Horizonte', state: 'Minas Gerais', abbr: 'MG', country: 'Brazil' };\n    } else {\n        // ❌ Último recurso: inferir da cidade do weather se possível\n        node.warn(`⚠️ Localização não encontrada! weather.location=${cityName}`);\n        location = { city: cityName || 'Desconhecido', state: 'N/A', abbr: 'XX', country: 'Brazil' };\n    }\n}\n\n// ==========================================\n// ALGORITMO DE RISCO DE QUEIMADA\n// ==========================================\nlet riskScore = 0;\nlet riskLevel = 'BAIXO';\nlet riskColor = '🟢';\n\n// 1. ANÁLISE DE FUMAÇA (peso: 40%)\nif (sensor.smoke > 600) riskScore += 40;\nelse if (sensor.smoke > 400) riskScore += 30;\nelse if (sensor.smoke > 200) riskScore += 15;\n\n// 2. ANÁLISE DE TEMPERATURA INTERNA (peso: 25%)\nif (sensor.temperature > 50) riskScore += 25;\nelse if (sensor.temperature > 40) riskScore += 20;\nelse if (sensor.temperature > 35) riskScore += 10;\n\n// 3. ANÁLISE DE TEMPERATURA EXTERNA (peso: 15%)\nif (extTemp > 35) riskScore += 15;\nelse if (extTemp > 30) riskScore += 10;\nelse if (extTemp > 25) riskScore += 5;\n\n// 4. ANÁLISE DE UMIDADE (peso: 10%)\nconst avgHumidity = (sensor.humidity + extHumidity) / 2;\nif (avgHumidity < 30) riskScore += 10;\nelse if (avgHumidity < 50) riskScore += 5;\n\n// 5. ANÁLISE DE VENTO (peso: 10%)\nif (windSpeed > 40) riskScore += 10;\nelse if (windSpeed > 20) riskScore += 5;\n\n// Determinar nível de risco\nif (riskScore >= 70) {\n    riskLevel = 'CRÍTICO';\n    riskColor = '🔴';\n} else if (riskScore >= 50) {\n    riskLevel = 'ALTO';\n    riskColor = '🟠';\n} else if (riskScore >= 30) {\n    riskLevel = 'MÉDIO';\n    riskColor = '🟡';\n} else {\n    riskLevel = 'BAIXO';\n    riskColor = '🟢';\n}\n\nconst timestamp = new Date();\n\n// Montar payload completo\nmsg.payload = {\n    sensor: {\n        device: sensor.device,\n        temperature: sensor.temperature,\n        humidity: sensor.humidity,\n        smoke: sensor.smoke\n    },\n    weather: {\n        temperature: extTemp,\n        humidity: extHumidity,\n        windSpeed: windSpeed,\n        conditions: conditions\n    },\n    location: location,\n    risk: {\n        score: riskScore,\n        level: riskLevel,\n        color: riskColor,\n        shouldAlert: riskScore >= 50\n    },\n    timestamp: timestamp.toISOString()\n};\n\nnode.status({\n    fill: riskScore >= 70 ? \"red\" : riskScore >= 50 ? \"yellow\" : \"green\",\n    shape: \"dot\",\n    text: `${sensor.device}/${location.abbr}: ${riskLevel} (${riskScore})`\n});\n\n// Saída 1: Sempre envia para InfluxDB\n// Saída 2: Só envia para WhatsApp se risco >= 50\nif (msg.payload.risk.shouldAlert) {\n    return [msg, msg];\n} else {\n    return [msg, null];\n}",
+        "func": "const requiredNumber = value => {\n    if (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) {\n        throw new Error('Missing or invalid numeric observation');\n    }\n    return Number(value);\n};\nconst sensor = global.get('sensorData');\nif (!sensor) throw new Error('Sensor data is required before scoring');\n\nconst weather = msg.payload;\nconst extTemp = requiredNumber(weather.tempc);\nconst extHumidity = requiredNumber(weather.humidity);\nconst windSpeed = requiredNumber(weather.windspeed);\nconst conditions = weather.description || 'desconhecido';\n\nlet location;\nif (msg.location && msg.location.abbr) {\n    location = msg.location;\n} else {\n    const cityName = weather.location || '';\n    if (cityName.includes('Manaus')) {\n        location = { city: 'Manaus', state: 'Amazonas', abbr: 'AM', country: 'Brazil' };\n    } else if (cityName.includes('Campo Grande')) {\n        location = { city: 'Campo Grande', state: 'Mato Grosso do Sul', abbr: 'MS', country: 'Brazil' };\n    } else if (cityName.includes('Belo Horizonte')) {\n        location = { city: 'Belo Horizonte', state: 'Minas Gerais', abbr: 'MG', country: 'Brazil' };\n    } else {\n        node.warn(`⚠️ Localização não encontrada! weather.location=${cityName}`);\n        location = { city: cityName || 'Desconhecido', state: 'N/A', abbr: 'XX', country: 'Brazil' };\n    }\n}\n\nlet riskScore = 0;\nlet riskLevel = 'BAIXO';\nlet riskColor = '🟢';\n\nif (sensor.smoke > 600) riskScore += 40;\nelse if (sensor.smoke > 400) riskScore += 30;\nelse if (sensor.smoke > 200) riskScore += 15;\n\nif (sensor.temperature > 50) riskScore += 25;\nelse if (sensor.temperature > 40) riskScore += 20;\nelse if (sensor.temperature > 35) riskScore += 10;\n\nif (extTemp > 35) riskScore += 15;\nelse if (extTemp > 30) riskScore += 10;\nelse if (extTemp > 25) riskScore += 5;\n\nconst avgHumidity = (sensor.humidity + extHumidity) / 2;\nif (avgHumidity < 30) riskScore += 10;\nelse if (avgHumidity < 50) riskScore += 5;\n\nif (windSpeed > 40) riskScore += 10;\nelse if (windSpeed > 20) riskScore += 5;\n\nif (riskScore >= 70) {\n    riskLevel = 'CRÍTICO';\n    riskColor = '🔴';\n} else if (riskScore >= 50) {\n    riskLevel = 'ALTO';\n    riskColor = '🟠';\n} else if (riskScore >= 30) {\n    riskLevel = 'MÉDIO';\n    riskColor = '🟡';\n} else {\n    riskLevel = 'BAIXO';\n    riskColor = '🟢';\n}\n\nconst timestamp = new Date();\n\nmsg.payload = {\n    sensor: {\n        device: sensor.device,\n        temperature: sensor.temperature,\n        humidity: sensor.humidity,\n        smoke: sensor.smoke\n    },\n    weather: {\n        temperature: extTemp,\n        humidity: extHumidity,\n        windSpeed: windSpeed,\n        conditions: conditions\n    },\n    location: location,\n    risk: {\n        score: riskScore,\n        level: riskLevel,\n        color: riskColor,\n        shouldAlert: riskScore >= 50\n    },\n    timestamp: timestamp.toISOString()\n};\n\nnode.status({\n    fill: riskScore >= 70 ? \"red\" : riskScore >= 50 ? \"yellow\" : \"green\",\n    shape: \"dot\",\n    text: `${sensor.device}/${location.abbr}: ${riskLevel} (${riskScore})`\n});\n\nif (msg.payload.risk.shouldAlert) {\n    return [msg, msg];\n} else {\n    return [msg, null];\n}",
         "outputs": 2,
         "noerr": 0,
         "x": 740,
         "y": 440,
         "wires": [
-            ["format_influxdb", "debug_analysis"],
-            ["format_whatsapp"]
+            [
+                "format_influxdb",
+                "debug_analysis"
+            ],
+            [
+                "format_whatsapp"
+            ]
         ]
     },
     {
@@ -187,12 +238,17 @@
         "type": "function",
         "z": "fire_detection_tab",
         "name": "Formatar para InfluxDB 2.0",
-        "func": "const data = msg.payload;\n\n// Sanitizar e converter todos os valores numéricos\nconst sensor_temp = Number(data.sensor.temperature) || 0;\nconst sensor_humidity = Number(data.sensor.humidity) || 0;\nconst sensor_smoke = Number(data.sensor.smoke) || 0;\nconst weather_temp = Number(data.weather.temperature) || 0;\nconst weather_humidity = Number(data.weather.humidity) || 0;\nconst weather_wind = Number(data.weather.windSpeed) || 0;\nconst risk_score = Number(data.risk.score) || 0;\n\n// Tags (strings)\nconst device = String(data.sensor.device || 'unknown');\nconst location = String(data.location.city || 'unknown');\nconst state = String(data.location.abbr || 'XX');\nconst region = String(data.location.state || 'unknown');\nconst risk_level = String(data.risk.level || 'N/A');\nconst alert = data.risk.shouldAlert ? 'true' : 'false';\n\n// Timestamp\nconst ts = new Date(data.timestamp);\n\n// FORMATO CORRETO para node-red-contrib-influxdb 0.7.0 com InfluxDB 2.0\n// O nó espera msg.payload como objeto flat com os fields\n// Tags devem estar em msg.payload também\n// measurement e timestamp vão em propriedades separadas\n\nmsg.payload = {\n    // FIELDS (valores numéricos)\n    sensor_temp: sensor_temp,\n    sensor_humidity: sensor_humidity,\n    sensor_smoke: sensor_smoke,\n    weather_temp: weather_temp,\n    weather_humidity: weather_humidity,\n    weather_wind: weather_wind,\n    risk_score: risk_score,\n    // TAGS (valores string)\n    device: device,\n    location: location,\n    state: state,\n    region: region,\n    risk_level: risk_level,\n    alert: alert\n};\n\n// Measurement name\nmsg.measurement = 'fire_detection';\n\n// Timestamp em nanosegundos\nmsg.timestamp = ts.getTime() * 1000000;\n\nnode.status({\n    fill: \"blue\",\n    shape: \"dot\",\n    text: `${device}/${state}: Score=${risk_score}`\n});\n\nreturn msg;",
+        "func": "// node-red-contrib-influxdb expects [fields, tags] for a tagged point.\nconst data = msg.payload;\nconst numeric = value => {\n    const number = Number(value);\n    if (!Number.isFinite(number)) throw new Error(\"Non-finite measurement\");\n    return number;\n};\nconst timestamp = new Date(data.timestamp);\nif (!Number.isFinite(timestamp.getTime())) throw new Error(\"Invalid timestamp\");\nmsg.payload = [{\n    sensor_temp: numeric(data.sensor.temperature),\n    sensor_humidity: numeric(data.sensor.humidity),\n    sensor_smoke: numeric(data.sensor.smoke),\n    weather_temp: numeric(data.weather.temperature),\n    weather_humidity: numeric(data.weather.humidity),\n    weather_wind: numeric(data.weather.windSpeed),\n    risk_score: numeric(data.risk.score),\n    time: timestamp\n}, {\n    device: String(data.sensor.device || 'unknown'),\n    location: String(data.location.city || 'unknown'),\n    state: String(data.location.abbr || 'XX'),\n    region: String(data.location.state || 'unknown'),\n    risk_level: String(data.risk.level),\n    alert: String(Boolean(data.risk.shouldAlert))\n}];\nmsg.measurement = 'fire_detection';\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "x": 1020,
         "y": 440,
-        "wires": [["influxdb_output", "debug_influx"]]
+        "wires": [
+            [
+                "influxdb_output",
+                "debug_influx"
+            ]
+        ]
     },
     {
         "id": "influxdb_output",
@@ -210,7 +266,8 @@
         "bucket": "fire-detection",
         "x": 1290,
         "y": 440,
-        "wires": []
+        "wires": [],
+        "d": true
     },
     {
         "id": "format_whatsapp",
@@ -222,7 +279,12 @@
         "noerr": 0,
         "x": 1040,
         "y": 520,
-        "wires": [["whatsapp_output", "debug_whatsapp"]]
+        "wires": [
+            [
+                "whatsapp_output",
+                "debug_whatsapp"
+            ]
+        ]
     },
     {
         "id": "whatsapp_output",
@@ -240,7 +302,12 @@
         "rejectssl": false,
         "x": 1290,
         "y": 520,
-        "wires": [["debug_whatsapp_response"]]
+        "wires": [
+            [
+                "debug_whatsapp_response"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "comment_testes",
@@ -265,7 +332,12 @@
         "topic": "",
         "x": 220,
         "y": 640,
-        "wires": [["clear_cache_function"]]
+        "wires": [
+            [
+                "clear_cache_function"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "clear_cache_function",
@@ -294,7 +366,11 @@
         "type": "inject",
         "z": "fire_detection_tab",
         "name": "ESP32: INCÊINDIO CRÍTICO",
-        "props": [{"p": "payload"}],
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
         "repeat": "",
         "crontab": "",
         "once": false,
@@ -304,14 +380,23 @@
         "payloadType": "json",
         "x": 180,
         "y": 720,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "inject_high_esp32",
         "type": "inject",
         "z": "fire_detection_tab",
         "name": "ESP32: Risco ALTO",
-        "props": [{"p": "payload"}],
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
         "repeat": "",
         "crontab": "",
         "once": false,
@@ -321,14 +406,23 @@
         "payloadType": "json",
         "x": 170,
         "y": 760,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "inject_normal_esp32",
         "type": "inject",
         "z": "fire_detection_tab",
         "name": "ESP32: Condições NORMAIS",
-        "props": [{"p": "payload"}],
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
         "repeat": "",
         "crontab": "",
         "once": false,
@@ -338,14 +432,23 @@
         "payloadType": "json",
         "x": 200,
         "y": 800,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "inject_auto_esp32",
         "type": "inject",
         "z": "fire_detection_tab",
         "name": "ESP32: Auto (5 min)",
-        "props": [{"p": "payload"}],
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
         "repeat": "",
         "crontab": "",
         "once": false,
@@ -355,7 +458,12 @@
         "payloadType": "json",
         "x": 180,
         "y": 840,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "comment_api_tests",
@@ -372,7 +480,11 @@
         "type": "inject",
         "z": "fire_detection_tab",
         "name": "API: Auto a cada 1 minuto",
-        "props": [{"p": "payload"}],
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
         "repeat": "60",
         "crontab": "",
         "once": true,
@@ -382,7 +494,12 @@
         "payloadType": "json",
         "x": 200,
         "y": 940,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "comment_api_manual_tests",
@@ -399,7 +516,11 @@
         "type": "inject",
         "z": "fire_detection_tab",
         "name": "API: INCÊINDIO CRÍTICO",
-        "props": [{"p": "payload"}],
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
         "repeat": "",
         "crontab": "",
         "once": false,
@@ -409,14 +530,23 @@
         "payloadType": "json",
         "x": 170,
         "y": 1040,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "inject_high_api",
         "type": "inject",
         "z": "fire_detection_tab",
         "name": "API: Risco ALTO",
-        "props": [{"p": "payload"}],
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
         "repeat": "",
         "crontab": "",
         "once": false,
@@ -426,14 +556,23 @@
         "payloadType": "json",
         "x": 160,
         "y": 1080,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "inject_normal_api",
         "type": "inject",
         "z": "fire_detection_tab",
         "name": "API: Condições NORMAIS",
-        "props": [{"p": "payload"}],
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
         "repeat": "",
         "crontab": "",
         "once": false,
@@ -443,7 +582,12 @@
         "payloadType": "json",
         "x": 190,
         "y": 1120,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "comment_simulator",
@@ -468,7 +612,12 @@
         "topic": "",
         "x": 240,
         "y": 1220,
-        "wires": [["function_simulator"]]
+        "wires": [
+            [
+                "function_simulator"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "function_simulator",
@@ -480,7 +629,11 @@
         "noerr": 0,
         "x": 540,
         "y": 1220,
-        "wires": [["save_sensor_data"]]
+        "wires": [
+            [
+                "save_sensor_data"
+            ]
+        ]
     },
     {
         "id": "inject_simulator_manual",
@@ -495,7 +648,12 @@
         "topic": "",
         "x": 200,
         "y": 1260,
-        "wires": [["function_simulator"]]
+        "wires": [
+            [
+                "function_simulator"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "comment_simulator_info",
@@ -605,7 +763,12 @@
         "topic": "",
         "x": 170,
         "y": 120,
-        "wires": [["create_api_requests"]]
+        "wires": [
+            [
+                "create_api_requests"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "create_api_requests",
@@ -617,7 +780,11 @@
         "noerr": 0,
         "x": 440,
         "y": 120,
-        "wires": [["split_api_requests"]]
+        "wires": [
+            [
+                "split_api_requests"
+            ]
+        ]
     },
     {
         "id": "split_api_requests",
@@ -632,7 +799,11 @@
         "addname": "",
         "x": 690,
         "y": 120,
-        "wires": [["route_api_weather"]]
+        "wires": [
+            [
+                "route_api_weather"
+            ]
+        ]
     },
     {
         "id": "comment_api_weather",
@@ -654,7 +825,17 @@
         "noerr": 0,
         "x": 130,
         "y": 280,
-        "wires": [["api_weather_am"], ["api_weather_ms"], ["api_weather_mg"]]
+        "wires": [
+            [
+                "api_weather_am"
+            ],
+            [
+                "api_weather_ms"
+            ],
+            [
+                "api_weather_mg"
+            ]
+        ]
     },
     {
         "id": "api_weather_am",
@@ -669,7 +850,12 @@
         "language": "pt",
         "x": 360,
         "y": 240,
-        "wires": [["calculate_api_risk"]]
+        "wires": [
+            [
+                "calculate_api_risk"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "api_weather_ms",
@@ -684,7 +870,12 @@
         "language": "pt",
         "x": 390,
         "y": 280,
-        "wires": [["calculate_api_risk"]]
+        "wires": [
+            [
+                "calculate_api_risk"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "api_weather_mg",
@@ -699,7 +890,12 @@
         "language": "pt",
         "x": 400,
         "y": 320,
-        "wires": [["calculate_api_risk"]]
+        "wires": [
+            [
+                "calculate_api_risk"
+            ]
+        ],
+        "d": true
     },
     {
         "id": "comment_api_analysis",
@@ -716,14 +912,19 @@
         "type": "function",
         "z": "api_only_tab",
         "name": "Calcular Risco API (Meteorológico)",
-        "func": "// Algoritmo de risco baseado APENAS em dados meteorológicos reais\n// Não usa dados de sensores (temperatura interna, fumaça)\n\nconst weather = msg.payload;\nconst location = msg.location;\n\n// Extrair dados meteorológicos\nconst temp = parseFloat(weather.tempc) || 25;\nconst humidity = parseFloat(weather.humidity) || 50;\nconst windSpeed = parseFloat(weather.windspeed) || 0;\nconst conditions = weather.description || 'desconhecido';\n\n// ==========================================\n// ALGORITMO SIMPLIFICADO (SEM SENSORES)\n// ==========================================\nlet riskScore = 0;\n\n// 1. TEMPERATURA EXTERNA (50% do peso)\nif (temp > 38) riskScore += 50;\nelse if (temp > 34) riskScore += 40;\nelse if (temp > 30) riskScore += 25;\nelse if (temp > 26) riskScore += 10;\n\n// 2. UMIDADE (30% do peso)\nif (humidity < 20) riskScore += 30;\nelse if (humidity < 35) riskScore += 20;\nelse if (humidity < 50) riskScore += 10;\n\n// 3. VENTO (20% do peso)\nif (windSpeed > 50) riskScore += 20;\nelse if (windSpeed > 30) riskScore += 15;\nelse if (windSpeed > 15) riskScore += 8;\n\n// Determinar nível\nlet riskLevel = 'BAIXO';\nif (riskScore >= 70) riskLevel = 'CRÍTICO';\nelse if (riskScore >= 50) riskLevel = 'ALTO';\nelse if (riskScore >= 30) riskLevel = 'MÉDIO';\n\nconst timestamp = new Date();\n\n// Montar payload\nmsg.payload = {\n    sensor: {\n        device: 'api',\n        temperature: temp,  // Usar temp externa como \"sensor\"\n        humidity: humidity,\n        smoke: 0  // API não tem sensor de fumaça\n    },\n    weather: {\n        temperature: temp,\n        humidity: humidity,\n        windSpeed: windSpeed,\n        conditions: conditions\n    },\n    location: location,\n    risk: {\n        score: riskScore,\n        level: riskLevel,\n        color: riskScore >= 70 ? '🔴' : riskScore >= 50 ? '🟠' : riskScore >= 30 ? '🟡' : '🟢',\n        shouldAlert: riskScore >= 50\n    },\n    timestamp: timestamp.toISOString()\n};\n\nnode.status({\n    fill: riskScore >= 70 ? \"red\" : riskScore >= 50 ? \"yellow\" : \"green\",\n    shape: \"dot\",\n    text: `API/${location.abbr}: ${riskLevel} (${riskScore})`\n});\n\n// Saída 1: InfluxDB\n// Saída 2: WhatsApp (se alerta)\nif (msg.payload.risk.shouldAlert) {\n    return [msg, msg];\n} else {\n    return [msg, null];\n}",
+        "func": "const requiredNumber = value => {\n    if (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) {\n        throw new Error('Missing or invalid numeric observation');\n    }\n    return Number(value);\n};\n\nconst weather = msg.payload;\nconst location = msg.location;\n\nconst temp = requiredNumber(weather.tempc);\nconst humidity = requiredNumber(weather.humidity);\nconst windSpeed = requiredNumber(weather.windspeed);\nconst conditions = weather.description || 'desconhecido';\n\nlet riskScore = 0;\n\nif (temp > 38) riskScore += 50;\nelse if (temp > 34) riskScore += 40;\nelse if (temp > 30) riskScore += 25;\nelse if (temp > 26) riskScore += 10;\n\nif (humidity < 20) riskScore += 30;\nelse if (humidity < 35) riskScore += 20;\nelse if (humidity < 50) riskScore += 10;\n\nif (windSpeed > 50) riskScore += 20;\nelse if (windSpeed > 30) riskScore += 15;\nelse if (windSpeed > 15) riskScore += 8;\n\nlet riskLevel = 'BAIXO';\nif (riskScore >= 70) riskLevel = 'CRÍTICO';\nelse if (riskScore >= 50) riskLevel = 'ALTO';\nelse if (riskScore >= 30) riskLevel = 'MÉDIO';\n\nconst timestamp = new Date();\n\nmsg.payload = {\n    sensor: {\n        device: 'api',\n        temperature: temp,  // Usar temp externa como \"sensor\"\n        humidity: humidity,\n        smoke: 0  // API não tem sensor de fumaça\n    },\n    weather: {\n        temperature: temp,\n        humidity: humidity,\n        windSpeed: windSpeed,\n        conditions: conditions\n    },\n    location: location,\n    risk: {\n        score: riskScore,\n        level: riskLevel,\n        color: riskScore >= 70 ? '🔴' : riskScore >= 50 ? '🟠' : riskScore >= 30 ? '🟡' : '🟢',\n        shouldAlert: riskScore >= 50\n    },\n    timestamp: timestamp.toISOString()\n};\n\nnode.status({\n    fill: riskScore >= 70 ? \"red\" : riskScore >= 50 ? \"yellow\" : \"green\",\n    shape: \"dot\",\n    text: `API/${location.abbr}: ${riskLevel} (${riskScore})`\n});\n\nif (msg.payload.risk.shouldAlert) {\n    return [msg, msg];\n} else {\n    return [msg, null];\n}",
         "outputs": 2,
         "noerr": 0,
         "x": 730,
         "y": 440,
         "wires": [
-            ["format_api_influx", "debug_api"],
-            ["format_api_whatsapp"]
+            [
+                "format_api_influx",
+                "debug_api"
+            ],
+            [
+                "format_api_whatsapp"
+            ]
         ]
     },
     {
@@ -741,12 +942,16 @@
         "type": "function",
         "z": "api_only_tab",
         "name": "Formatar InfluxDB (API)",
-        "func": "const data = msg.payload;\n\n// Valores numéricos\nconst sensor_temp = Number(data.weather.temperature) || 0;\nconst sensor_humidity = Number(data.weather.humidity) || 0;\nconst sensor_smoke = 0;  // API não tem sensor de fumaça\nconst weather_temp = Number(data.weather.temperature) || 0;\nconst weather_humidity = Number(data.weather.humidity) || 0;\nconst weather_wind = Number(data.weather.windSpeed) || 0;\nconst risk_score = Number(data.risk.score) || 0;\n\n// Tags\nconst device = 'api';  // IMPORTANTE: marcar como 'api'\nconst location = String(data.location.city || 'unknown');\nconst state = String(data.location.abbr || 'XX');\nconst region = String(data.location.state || 'unknown');\nconst risk_level = String(data.risk.level || 'N/A');\nconst alert = data.risk.shouldAlert ? 'true' : 'false';\n\nconst ts = new Date(data.timestamp);\n\nmsg.payload = {\n    // FIELDS\n    sensor_temp: sensor_temp,\n    sensor_humidity: sensor_humidity,\n    sensor_smoke: sensor_smoke,\n    weather_temp: weather_temp,\n    weather_humidity: weather_humidity,\n    weather_wind: weather_wind,\n    risk_score: risk_score,\n    // TAGS\n    device: device,\n    location: location,\n    state: state,\n    region: region,\n    risk_level: risk_level,\n    alert: alert\n};\n\nmsg.measurement = 'fire_detection';\nmsg.timestamp = ts.getTime() * 1000000;\n\nnode.status({\n    fill: \"blue\",\n    shape: \"dot\",\n    text: `API/${state}: ${risk_score}`\n});\n\nreturn msg;",
+        "func": "// node-red-contrib-influxdb expects [fields, tags] for a tagged point.\nconst data = msg.payload;\nconst numeric = value => {\n    const number = Number(value);\n    if (!Number.isFinite(number)) throw new Error(\"Non-finite measurement\");\n    return number;\n};\nconst timestamp = new Date(data.timestamp);\nif (!Number.isFinite(timestamp.getTime())) throw new Error(\"Invalid timestamp\");\nmsg.payload = [{\n    sensor_temp: numeric(data.sensor.temperature),\n    sensor_humidity: numeric(data.sensor.humidity),\n    sensor_smoke: numeric(data.sensor.smoke),\n    weather_temp: numeric(data.weather.temperature),\n    weather_humidity: numeric(data.weather.humidity),\n    weather_wind: numeric(data.weather.windSpeed),\n    risk_score: numeric(data.risk.score),\n    time: timestamp\n}, {\n    device: String(data.sensor.device || 'unknown'),\n    location: String(data.location.city || 'unknown'),\n    state: String(data.location.abbr || 'XX'),\n    region: String(data.location.state || 'unknown'),\n    risk_level: String(data.risk.level),\n    alert: String(Boolean(data.risk.shouldAlert))\n}];\nmsg.measurement = 'fire_detection';\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "x": 1000,
         "y": 440,
-        "wires": [["influxdb_api_output"]]
+        "wires": [
+            [
+                "influxdb_api_output"
+            ]
+        ]
     },
     {
         "id": "influxdb_api_output",
@@ -764,7 +969,8 @@
         "bucket": "fire-detection",
         "x": 1240,
         "y": 440,
-        "wires": []
+        "wires": [],
+        "d": true
     },
     {
         "id": "format_api_whatsapp",
@@ -776,7 +982,11 @@
         "noerr": 0,
         "x": 1010,
         "y": 520,
-        "wires": [["whatsapp_api_output"]]
+        "wires": [
+            [
+                "whatsapp_api_output"
+            ]
+        ]
     },
     {
         "id": "whatsapp_api_output",
@@ -794,7 +1004,10 @@
         "rejectssl": false,
         "x": 1240,
         "y": 520,
-        "wires": [[]]
+        "wires": [
+            []
+        ],
+        "d": true
     },
     {
         "id": "debug_api",
